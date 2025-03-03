@@ -23,16 +23,16 @@ Welcome to ska-mid-cbf-common-test-infrastructure's documentation!
 
    main_README.md
 
-.. data README =============================================================
+.. CTI Data README =============================================================
 .. toctree::
    :maxdepth: 2
-   :caption: data README
+   :caption: CTI Data README
 
    data_README.md
 
-.. template_service README =============================================================
+.. Template Service README =============================================================
 .. toctree::
    :maxdepth: 2
-   :caption: Main Repository README
+   :caption: Template Service README
 
    template_service_README.md
