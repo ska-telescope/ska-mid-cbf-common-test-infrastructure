@@ -16,3 +16,5 @@ include .make/k8s.mk
 include .make/python.mk
 
 PYTHON_LINT_TARGET = template_service/src template_service/tests/
+PYTHON_SRC = template_service/src
+PYTHON_TEST_FILE = template_service/tests/
