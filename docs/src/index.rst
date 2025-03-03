@@ -35,4 +35,4 @@ Welcome to ska-mid-cbf-common-test-infrastructure's documentation!
    :maxdepth: 2
    :caption: Main Repository README
 
-   template_service.md
+   template_service_README.md
