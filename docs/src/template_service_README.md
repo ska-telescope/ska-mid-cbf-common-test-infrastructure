@@ -1,3 +1,1 @@
-# Template Service
-
-Template service directory showing structure CTI services should take.
+../../src/template_service/README.md
