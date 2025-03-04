@@ -15,7 +15,8 @@ readme = "README.md"
 
 packages = [
     { include = "template_service", from = "src" },
-    { include = "assertive_logging_observer", from = "src" }
+    { include = "assertive_logging_observer", from = "src" },
+    { include = "test_logging", from = "src" }
 ]
 
 [tool.poetry.dependencies]

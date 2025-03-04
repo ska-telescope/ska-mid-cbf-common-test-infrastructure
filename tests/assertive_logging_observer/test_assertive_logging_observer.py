@@ -1,11 +1,9 @@
 import logging
 
 import assertive_logging_observer.assertive_logging_observer as alo
+from test_logging.format import LOG_FORMAT
 
-logging.basicConfig(
-    format="[%(asctime)s|%(levelname)s|%(filename)s#%(lineno)s] %(message)s",
-    level=logging.INFO,
-)
+logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 _logger = logging.getLogger(__name__)
 
 
