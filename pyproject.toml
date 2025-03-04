@@ -13,6 +13,11 @@ authors = [
 license = "BSD License"
 readme = "README.md"
 
+packages = [
+    { include = "template_service", from = "src" },
+    { include = "assertive_logging_observer", from = "src" }
+]
+
 [tool.poetry.dependencies]
 python = "^3.10"
 isort = "^5.6.4"
