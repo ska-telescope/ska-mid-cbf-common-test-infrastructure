@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "ska-mid-cbf-common-test-infrastructure"
+version = "0.0.0"
+description = ""
+authors = [
+    "Rob Huxtable <robert.huxtable@mda.space>",
+    "Anton Deriabine <anton.deriabine@mda.space>",
+    "Elizabeth Pieters <elizabeth.pieters@mda.space>",
+    "Parmis Mohaghegh <parmis.mohaghegh@mda.space>",
+    "Dave Kaufman <dave.kaufman@mda.space>",
+    "Brandon Dos Remedios <brandon.dosremedios@mda.space>",
+]
+license = "BSD License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+isort = "^5.6.4"
+flake8 = "^3.9.2"
+black = "^22.3.0"
+jsonschema = "^4.18.4"
+pytest-json-report = "^1.5.0"
+pytest-cov = "^4.1.0"
+pylint = "^2.17.4"
+pylint-junit = "^0.3.2"
+pytest-json = "^0.4.0"
+pylance = "^0.5.9"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.4.7"
+sphinx-rtd-theme = "^3.0.0"
+myst-parser = "^4.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
