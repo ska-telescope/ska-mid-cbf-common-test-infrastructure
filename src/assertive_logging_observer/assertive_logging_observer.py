@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from time import sleep
 from typing import Any
 
-from assertpy import assert_that
+from assertpy import assert_that, fail
 from ska_tango_testing.integration import TangoEventTracer
 
 
@@ -47,71 +46,125 @@ class AssertiveLoggingObserver:
         """a"""
         self.event_tracer = event_tracer
 
-    def _format_report(
+    def _log_pass(
         self: AssertiveLoggingObserver, function_name: str, result: str
     ) -> str:
-        return f"AssertiveLoggingObserver.{function_name} received {result}"
+        self.logger.info(
+            f"PASS: AssertiveLoggingObserver.{function_name} "
+            f"observed: {result}"
+        )
+
+    def _log_fail(
+        self: AssertiveLoggingObserver, function_name: str, result: str
+    ) -> str:
+        msg = (
+            f"FAIL: AssertiveLoggingObserver.{function_name} "
+            f"observed: {result}"
+        )
+        if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+            self.logger.error(msg)
+        else:
+            self.logger.warning(msg)
 
     def observe_true(self: AssertiveLoggingObserver, test_bool: bool) -> None:
         """Observes true in given test_bool"""
-        self.logger.info(self._format_report("observe_true", test_bool))
-        if self.mode == AssertiveLoggingObserverMode.ASSERTING:
-            assert_that(test_bool).is_true()
+        if test_bool:
+            self._log_pass("observe_true", test_bool)
+        else:
+            self._log_fail("observe_true", test_bool)
+            if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+                fail()
 
     def observe_false(self: AssertiveLoggingObserver, test_bool: bool) -> None:
         """Observes false in given test_bool"""
-        self.logger.info(self._format_report("observe_false", test_bool))
-        if self.mode == AssertiveLoggingObserverMode.ASSERTING:
-            assert_that(test_bool).is_false()
+        if not test_bool:
+            self._log_pass("observe_false", test_bool)
+        else:
+            self._log_fail("observe_false", test_bool)
+            if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+                fail()
 
     def observe_device_state_change(
         self: AssertiveLoggingObserver,
         device_name: str,
         target_state_name: str,
         target_state: Any,
-        timeout_state_change: int,
+        timeout_state_change: float,
     ) -> None:
         """s"""
-        print(device_name)
-        print(target_state_name)
-        print(target_state)
-        sleep(timeout_state_change)
-        print(self.event_tracer.events)
-        assert False
-        # if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+        try:
 
-        #     assert_that(self.event_tracer).within_timeout(
-        #         timeout_state_change
-        #     ).has_change_event_occurred(
-        #         device_name=device_name,
-        #         attribute_name=target_state_name,
-        #         attribute_value=target_state,
-        #     )
+            assert_that(self.event_tracer).within_timeout(
+                timeout_state_change
+            ).has_change_event_occurred(
+                device_name=device_name,
+                attribute_name=target_state_name,
+                attribute_value=target_state,
+            )
 
-        # else:
+            self._log_pass(
+                "observe_device_state_change",
+                f"successfully captured (device: {device_name} | "
+                f"state: {target_state_name} | "
+                f"state_change: {target_state} | "
+                f"within timeout: {timeout_state_change}s)",
+            )
+
+        except AssertionError as exception:
+
+            self._log_fail(
+                "observe_device_state_change",
+                f"did not capture (device: {device_name} | "
+                f"state: {target_state_name} | "
+                f"state_change: {target_state} | "
+                f"within timeout: {timeout_state_change}s)",
+            )
+
+            if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+                raise exception
 
     def observe_lrc_result(
         self: AssertiveLoggingObserver,
         device_name: str,
         device_lrc_cmd_result: Any,
         lrc_cmd_name: str,
-        timeout_lrc: int,
+        timeout_lrc: float,
     ):
         """s"""
-        print(device_lrc_cmd_result)
-        print(device_name)
-        print(lrc_cmd_name)
-        print(timeout_lrc)
-        print(self.event_tracer.events)
-        assert False
+        try:
 
-        #     assert_that(self.event_tracer).within_timeout(
-        #         timeout_lrc
-        #     ).has_change_event_occurred(
-        #         device_name=device_name,
-        #         attribute_name="longRunningCommandResult",
-        #         attribute_value=(
-        #             f"{device_lrc_cmd_result[1][0]}",
-        #             f'[0, "{lrc_cmd_name} completed OK"]',
-        #         ),
-        #     )
+            assert_that(self.event_tracer).within_timeout(
+                timeout_lrc
+            ).has_change_event_occurred(
+                device_name=device_name,
+                attribute_name="longRunningCommandResult",
+                attribute_value=(
+                    f"{device_lrc_cmd_result[1][0]}",
+                    f'[0, "{lrc_cmd_name} completed OK"]',
+                ),
+            )
+
+            self._log_pass(
+                "observe_lrc_result",
+                f"successfully captured (device: {device_name} | "
+                f"LRC_command: {device_lrc_cmd_result[1][0]} | "
+                f"result: "
+                f'[0, "{lrc_cmd_name} completed OK"]'
+                " | "
+                f"within timeout: {timeout_lrc}s)",
+            )
+
+        except AssertionError as exception:
+
+            self._log_fail(
+                "observe_lrc_result",
+                f"did not capture (device: {device_name} | "
+                f"LRC_command: {device_lrc_cmd_result[1][0]} | "
+                f"result: "
+                f'[0, "{lrc_cmd_name} completed OK"]'
+                " | "
+                f"within timeout: {timeout_lrc}s)",
+            )
+
+            if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+                raise exception
