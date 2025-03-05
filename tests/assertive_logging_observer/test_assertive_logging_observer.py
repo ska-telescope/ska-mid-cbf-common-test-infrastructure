@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 import logging
+from threading import Event
 from time import sleep
+from typing import Callable, Optional
 
 from assertpy import fail
 from ska_control_model import TaskStatus
-from ska_tango_base.executor.executor_component_manager import TaskExecutorComponentManager
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_tango_base.executor.executor_component_manager import (
+    TaskExecutorComponentManager,
+)
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
-from tango.server import attribute, command
+from tango.server import command
 from tango.test_context import DeviceTestContext
-from threading import Event
-from typing import Callable, Optional
 
 import assertive_logging_observer.assertive_logging_observer as alo
 from test_logging.format import LOG_FORMAT
@@ -30,10 +32,10 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         self.turn_on_cmd_callback = turn_on_cmd_callback
 
     def _turn_on_immediately(
-            self: MockPowerSwitchComponentManager,
-            task_callback: Optional[Callable] = None,
-            task_abort_event: Optional[Event] = None,
-        ):
+        self: MockPowerSwitchComponentManager,
+        task_callback: Optional[Callable] = None,
+        task_abort_event: Optional[Event] = None,
+    ):
         self.turn_on_cmd_callback()
         task_callback(
             result=(ResultCode.OK, "TurnOnImmediately completed OK"),
@@ -52,10 +54,10 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         )
 
     def _turn_on_after_0p3_seconds(
-            self: MockPowerSwitchComponentManager,
-            task_callback: Optional[Callable] = None,
-            task_abort_event: Optional[Event] = None,
-        ):
+        self: MockPowerSwitchComponentManager,
+        task_callback: Optional[Callable] = None,
+        task_abort_event: Optional[Event] = None,
+    ):
         sleep(0.3)
         self.turn_on_cmd_callback()
         task_callback(
@@ -74,6 +76,7 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
             task_callback=task_callback,
         )
 
+
 class MockPowerSwitch(SKABaseDevice):
 
     POWERSWITCH_FQDN = "test/device/power_switch"
@@ -81,7 +84,7 @@ class MockPowerSwitch(SKABaseDevice):
     def init_device(self: MockPowerSwitch):
         super().init_device()
         self.set_state(DevState.OFF)
-    
+
     def _turn_on(self: MockPowerSwitch) -> None:
         self.set_state(DevState.ON)
         self.push_change_event("state", DevState.ON)
@@ -100,7 +103,7 @@ class MockPowerSwitch(SKABaseDevice):
                 command_tracker=self._command_tracker,
                 component_manager=self.component_manager,
                 method_name="turn_on_immediately",
-                logger=self.logger
+                logger=self.logger,
             ),
         )
 
@@ -111,7 +114,7 @@ class MockPowerSwitch(SKABaseDevice):
                 command_tracker=self._command_tracker,
                 component_manager=self.component_manager,
                 method_name="turn_on_after_0p3_seconds",
-                logger=self.logger
+                logger=self.logger,
             ),
         )
 
@@ -163,30 +166,31 @@ class TestAssertiveLoggingObserver:
             self.asserter.observe_true(False)
             fail("Reached past observe_true")
         except AssertionError as e:
-            if ("Reached past observe_true" in str(e)):
+            if "Reached past observe_true" in str(e):
                 raise e
 
         try:
             self.asserter.observe_false(True)
             fail("Reached past observe_false")
         except AssertionError as e:
-            if ("Reached past observe_false" in str(e)):
+            if "Reached past observe_false" in str(e):
                 raise e
 
 
 class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserver):
-
     @classmethod
     def setup_class(cls: TestAssertiveLoggingObserver):
 
         cls.context = DeviceTestContext(
             MockPowerSwitch,
             device_name=MockPowerSwitch.POWERSWITCH_FQDN,
-            process=True
+            process=True,
         )
         cls.proxy = cls.context.__enter__()
         cls.tracer = TangoEventTracer()
-        cls.tracer.subscribe_event(MockPowerSwitch.POWERSWITCH_FQDN, "longRunningCommandResult")
+        cls.tracer.subscribe_event(
+            MockPowerSwitch.POWERSWITCH_FQDN, "longRunningCommandResult"
+        )
         cls.tracer.subscribe_event(MockPowerSwitch.POWERSWITCH_FQDN, "state")
         cls.asserter.set_event_tracer(cls.tracer)
         cls.reporter.set_event_tracer(cls.tracer)
@@ -201,97 +205,114 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserver):
         self.tracer.clear_events()
 
     def test_ALO_reporter_lrc_state_change_immediate_success(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
+        cmd_result = self.proxy.TurnOnImmediately()
 
-        result = self.proxy.TurnOnImmediately()
-
-        self.reporter.observe_device_lrc_state_change(
-            result,
+        self.reporter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnImmediately",
             "state",
             DevState.ON,
             1,
+        )
+        self.reporter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnImmediately",
             1,
         )
 
     def test_ALO_asserter_lrc_state_change_immediate_success(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
 
-        result = self.proxy.TurnOnImmediately()
+        cmd_result = self.proxy.TurnOnImmediately()
 
-        self.asserter.observe_device_lrc_state_change(
-            result,
+        self.asserter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnImmediately",
             "state",
             DevState.ON,
             1,
+        )
+        self.asserter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnImmediately",
             1,
         )
 
     def test_ALO_reporter_lrc_state_change_delayed_success(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
 
-        result = self.proxy.TurnOnAfter0p3Seconds()
+        cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
-        self.reporter.observe_device_lrc_state_change(
-            result,
+        self.reporter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnAfter0p3Seconds",
             "state",
             DevState.ON,
             1,
+        )
+        self.reporter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnAfter0p3Seconds",
             1,
         )
 
     def test_ALO_asserter_lrc_state_change_delayed_success(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
 
-        result = self.proxy.TurnOnAfter0p3Seconds()
+        cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
-        self.asserter.observe_device_lrc_state_change(
-            result,
+        self.asserter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnAfter0p3Seconds",
             "state",
             DevState.ON,
             1,
+        )
+        self.asserter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnAfter0p3Seconds",
             1,
         )
 
     def test_ALO_reporter_lrc_state_change_timeout_failure(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
 
-        result = self.proxy.TurnOnAfter0p3Seconds()
+        cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
-        self.reporter.observe_device_lrc_state_change(
-            result,
+        self.reporter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnAfter0p3Seconds",
             "state",
             DevState.ON,
-            0.1,
-            0.1,
+            0.05,
+        )
+        self.reporter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnAfter0p3Seconds",
+            0.05,
         )
 
     def test_ALO_asserter_lrc_state_change_timeout_failure(
-        self: TestAssertiveLoggingObserverLRC
+        self: TestAssertiveLoggingObserverLRC,
     ):
 
-        result = self.proxy.TurnOnAfter0p3Seconds()
+        cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
-        self.asserter.observe_device_lrc_state_change(
-            result,
+        self.asserter.observe_device_state_change(
             MockPowerSwitch.POWERSWITCH_FQDN,
-            "TurnOnAfter0p3Seconds",
             "state",
             DevState.ON,
-            0.1,
-            0.1,
+            0.05,
+        )
+        self.asserter.observe_lrc_result(
+            MockPowerSwitch.POWERSWITCH_FQDN,
+            cmd_result,
+            "TurnOnAfter0p3Seconds",
+            0.05,
         )
