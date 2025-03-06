@@ -11,6 +11,7 @@ from typing import Any
 
 from assertpy import assert_that, fail
 from ska_tango_testing.integration import TangoEventTracer
+from ska_tango_base.base.base_device import DevVarLongStringArrayType
 
 
 class AssertiveLoggingObserverMode(Enum):
@@ -148,7 +149,23 @@ class AssertiveLoggingObserver:
         target_state: Any,
         timeout_state_change: float,
     ):
-        """s"""
+        """
+        Observes a change of state target_state_name to target state
+        target_state for device FQDN device_name within a timeout of
+        timeout_state_change seconds. PASS behavior is state change succesfully
+        occurs within timeout, and FAIL otherwise.
+
+        REQUIRES: for success requires the event_tracer is set for
+            AssertiveLoggingObserver which has subscribed to device_name and
+            target_state_name.
+
+        :param device_name: FQDN of device to observe state change from.
+        :param target_state_name: attribute name to state to observe.
+        :param target_state: attribute value of new state for target_state_name
+            to change to.
+        :param timeout_state_change: maximum timeout to wait for state change
+            (seconds).
+        """
         if self.event_tracer is None:
             raise RuntimeError(
                 "event_tracer must not be None for "
@@ -187,11 +204,31 @@ class AssertiveLoggingObserver:
     def observe_lrc_result(
         self: AssertiveLoggingObserver,
         device_name: str,
-        device_lrc_cmd_result: Any,
+        lrc_cmd_result: DevVarLongStringArrayType,
         lrc_cmd_name: str,
         timeout_lrc: float,
     ):
-        """s"""
+        """
+        Observes longRunningCommandResult results in 
+        [0, "{lrc_cmd_name} completed OK"] for device FQDN device_name within
+        a timeout of imeout_lrc seconds. PASS behavior is stated
+        longRunningCommandResult succesfully occurs within timeout, and FAIL
+        otherwise. Long running command (LRC) concept can be found at
+        https://developer.skao.int/projects/ska-tango-base/en/latest/concepts/
+        long-running-commands.html.
+
+        REQUIRES: for success requires the event_tracer is set for
+            AssertiveLoggingObserver which has subscribed to device_name and
+            longRunningCommandResult.
+
+        :param device_name: FQDN of device to observe longRunningCommandResult
+            from.
+        :param lrc_cmd_result: DevVarLongStringArrayType containing LRC ID as
+            second item in iterable.
+        :param lrc_cmd_name: basic command name of LRC.
+        :param timeout_state_change: maximum timeout to wait for successful
+            longRunningCommandResult (seconds).
+        """
         if self.event_tracer is None:
             raise RuntimeError(
                 "event_tracer must not be None for "
@@ -206,14 +243,14 @@ class AssertiveLoggingObserver:
                 device_name=device_name,
                 attribute_name="longRunningCommandResult",
                 attribute_value=(
-                    f"{device_lrc_cmd_result[1][0]}",
+                    f"{lrc_cmd_result[1][0]}",
                     f'[0, "{lrc_cmd_name} completed OK"]',
                 ),
             )
             self._log_pass(
                 "observe_lrc_result",
                 f"successfully captured (device: {device_name} | "
-                f"LRC_command: {device_lrc_cmd_result[1][0]} | "
+                f"LRC_command: {lrc_cmd_result[1][0]} | "
                 f"result: "
                 f'[0, "{lrc_cmd_name} completed OK"]'
                 " | "
@@ -225,7 +262,7 @@ class AssertiveLoggingObserver:
             self._log_fail(
                 "observe_lrc_result",
                 f"did not capture (device: {device_name} | "
-                f"LRC_command: {device_lrc_cmd_result[1][0]} | "
+                f"LRC_command: {lrc_cmd_result[1][0]} | "
                 f"result: "
                 f'[0, "{lrc_cmd_name} completed OK"]'
                 " | "
