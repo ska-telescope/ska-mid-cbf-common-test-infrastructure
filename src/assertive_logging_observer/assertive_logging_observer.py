@@ -28,11 +28,11 @@ class AssertiveLoggingObserverMode(Enum):
 class AssertiveLoggingObserver:
     """
     Observing object which observes values, expressions, and commands in test
-    functionality and depending on set mode has the following behavior:
-    - just report on observations (WARN on failures) if in mode
-      AssertiveLoggingObserverMode.REPORTING
-    - report and assert on observations (ERROR on failures) if in mode
-      AssertiveLoggingObserverMode.ASSERTING
+    functionality and (depending on set mode) has the following behavior:
+    - if in mode AssertiveLoggingObserverMode.REPORTING only report on
+      observations (WARN on FAILs)
+    - if in mode AssertiveLoggingObserverMode.ASSERTING report and assert on
+      observations (ERROR on FAILs)
     """
 
     def __init__(
@@ -40,6 +40,12 @@ class AssertiveLoggingObserver:
         mode: AssertiveLoggingObserverMode,
         logger: logging.Logger,
     ):
+        """
+        Initialize a AssertiveLoggingObserver instance.
+
+        :param mode: behavior mode for observations.
+        :param logger: logger to log observations to.
+        """
         self.mode = mode
         self.logger = logger
         self.event_tracer = None
@@ -47,16 +53,31 @@ class AssertiveLoggingObserver:
     def set_event_tracer(
         self: AssertiveLoggingObserver, event_tracer: TangoEventTracer
     ):
-        """a"""
+        """
+        Sets the event_tracer for state change observations and LRC
+        observations.
+
+        :param event_tracer: TangoEventTracer to observer events from, must
+            be subscribed to:
+            - correct state attribute of correct device FQDN for calls to
+              observe_device_state_change
+            - longRunningCommandResult of correct device FQDN for calls to
+              observe_lrc_result
+        """
         self.event_tracer = event_tracer
 
     def remove_event_tracer(self: AssertiveLoggingObserver):
-        """a"""
+        """
+        Remove the current event_tracer.
+        """
         self.event_tracer = None
 
     def _log_pass(
         self: AssertiveLoggingObserver, function_name: str, result: str
     ):
+        """
+        Log message of PASS observation to logger.
+        """
         self.logger.info(
             f"PASS: AssertiveLoggingObserver.{function_name} "
             f"observed: {result}"
@@ -65,6 +86,10 @@ class AssertiveLoggingObserver:
     def _log_fail(
         self: AssertiveLoggingObserver, function_name: str, result: str
     ):
+        """
+        Log message of FAIL observation to logger, WARNING if in REPORTING
+        and ERROR if in ASSERTING.
+        """
         msg = (
             f"FAIL: AssertiveLoggingObserver.{function_name} "
             f"observed: {result}"
@@ -75,7 +100,11 @@ class AssertiveLoggingObserver:
             self.logger.warning(msg)
 
     def observe_true(self: AssertiveLoggingObserver, test_bool: bool):
-        """Observes true in given test_bool"""
+        """
+        Observes True for given test_bool.
+
+        :param test_bool: bool to observe if is True.
+        """
         if test_bool:
             self._log_pass("observe_true", test_bool)
         else:
@@ -84,7 +113,11 @@ class AssertiveLoggingObserver:
                 fail()
 
     def observe_false(self: AssertiveLoggingObserver, test_bool: bool):
-        """Observes false in given test_bool"""
+        """
+        Observes False for given test_bool.
+
+        :param test_bool: bool to observe if is False.
+        """
         if not test_bool:
             self._log_pass("observe_false", test_bool)
         else:
@@ -95,7 +128,12 @@ class AssertiveLoggingObserver:
     def observe_equality(
         self: AssertiveLoggingObserver, test_val1: Any, test_val2: Any
     ):
-        """Observes equality in between test_val1 and test_val2."""
+        """
+        Observes equality between given test_val1 and test_val2.
+
+        :param test_val1: first value to observe if is equal to test_val2.
+        :param test_val2: second value to observe if is equal to test_val1.
+        """
         if test_val1 == test_val2:
             self._log_pass("observe_equality", f"{test_val1} == {test_val2}")
         else:
@@ -126,7 +164,6 @@ class AssertiveLoggingObserver:
                 attribute_name=target_state_name,
                 attribute_value=target_state,
             )
-
             self._log_pass(
                 "observe_device_state_change",
                 f"successfully captured (device: {device_name} | "
@@ -144,7 +181,6 @@ class AssertiveLoggingObserver:
                 f"state_change: {target_state} | "
                 f"within timeout: {timeout_state_change}s)",
             )
-
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 raise exception
 
@@ -174,7 +210,6 @@ class AssertiveLoggingObserver:
                     f'[0, "{lrc_cmd_name} completed OK"]',
                 ),
             )
-
             self._log_pass(
                 "observe_lrc_result",
                 f"successfully captured (device: {device_name} | "
@@ -196,6 +231,5 @@ class AssertiveLoggingObserver:
                 " | "
                 f"within timeout: {timeout_lrc}s)",
             )
-
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 raise exception
