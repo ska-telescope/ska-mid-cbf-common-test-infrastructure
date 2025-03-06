@@ -19,9 +19,16 @@ test_logger = logging.getLogger(__name__)
 
 
 class TestAssertiveLoggingObserverCore:
-    @classmethod
-    def setup_class(cls: TestAssertiveLoggingObserver):
+    """
+    Core Test class for AssertiveLoggingObserver.
+    """
 
+    @classmethod
+    def setup_class(cls: TestAssertiveLoggingObserverCore):
+        """
+        Create a reporter and an asserter version of AssertiveLoggingObserver
+        to test with.
+        """
         cls.reporter = AssertiveLoggingObserver(
             AssertiveLoggingObserverMode.REPORTING, test_logger
         )
@@ -31,9 +38,24 @@ class TestAssertiveLoggingObserverCore:
         )
 
 
-class TestAssertiveLoggingObserver(TestAssertiveLoggingObserverCore):
-    def test_ALO_observe_bool(self: TestAssertiveLoggingObserver):
+class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
+    """
+    Test basic reporting/assertions for AssertiveLoggingObserver.
+    """
 
+    def test_ALO_observe_bool(self: TestAssertiveLoggingObserverBasic):
+        """
+        Test reporter and asserter for correct behavior when observing bools.
+
+        reporter behaviour:
+        - log bool value stating PASS when correctly matching bool to called
+          observe_bool and FAIL with a WARNING log otherwise.
+
+        asserter behaviour:
+        - log bool value stating PASS when correctly matching bool to called
+          observe_bool and FAIL with an ERROR log otherwise.
+        - raise AssertionError in FAIL situations.
+        """
         self.reporter.observe_true(True)
         self.reporter.observe_false(False)
         self.reporter.observe_true(False)
@@ -45,22 +67,29 @@ class TestAssertiveLoggingObserver(TestAssertiveLoggingObserverCore):
         try:
             self.asserter.observe_true(False)
             fail("Reached past observe_true")
-        except AssertionError as e:
-            if "Reached past observe_true" in str(e):
-                raise e
+        except AssertionError as exception:
+            if "Reached past observe_true" in str(exception):
+                raise exception
 
         try:
             self.asserter.observe_false(True)
             fail("Reached past observe_false")
-        except AssertionError as e:
-            if "Reached past observe_false" in str(e):
-                raise e
+        except AssertionError as exception:
+            if "Reached past observe_false" in str(exception):
+                raise exception
 
 
 class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
-    @classmethod
-    def setup_class(cls: TestAssertiveLoggingObserver):
+    """
+    Test LRC reporting/assertions for AssertiveLoggingObserver.
+    """
 
+    @classmethod
+    def setup_class(cls: TestAssertiveLoggingObserverLRC):
+        """
+        Set-up DeviceTestContext of MockPowerSwitch for testing and set-up
+        TangoEventTracer linking it to both the reporter and the asserter.
+        """
         super().setup_class()
 
         cls.context = DeviceTestContext(
@@ -79,17 +108,26 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
     @classmethod
     def teardown_class(cls: TestAssertiveLoggingObserverLRC):
+        """
+        Teardown DeviceTestContext of MockPowerSwitch for testing and also
+        unsubscribing TangoEventTracer.
+        """
         cls.tracer.unsubscribe_all()
         cls.context.__exit__(None, None, None)
 
     def setup_method(self: TestAssertiveLoggingObserverLRC, method):
+        """
+        Reset MockPowerSwitch and clear events between every test.
+        """
         self.proxy.TurnOff()
         self.tracer.clear_events()
 
     def test_ALO_reporter_lrc_state_change_immediate_success(
         self: TestAssertiveLoggingObserverLRC,
     ):
-
+        """
+        Test reporter logs PASS on immediately successful LRC and state change.
+        """
         cmd_result = self.proxy.TurnOnImmediately()
 
         self.reporter.observe_device_state_change(
@@ -109,7 +147,9 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     def test_ALO_asserter_lrc_state_change_immediate_success(
         self: TestAssertiveLoggingObserverLRC,
     ):
-
+        """
+        Test asserter logs PASS on immediately successful LRC and state change.
+        """
         cmd_result = self.proxy.TurnOnImmediately()
 
         self.asserter.observe_device_state_change(
@@ -129,7 +169,9 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     def test_ALO_reporter_lrc_state_change_delayed_success(
         self: TestAssertiveLoggingObserverLRC,
     ):
-
+        """
+        Test reporter logs PASS on delayed successful LRC and state change.
+        """
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.reporter.observe_device_state_change(
@@ -149,7 +191,9 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     def test_ALO_asserter_lrc_state_change_delayed_success(
         self: TestAssertiveLoggingObserverLRC,
     ):
-
+        """
+        Test asserter logs PASS on delayed successful LRC and state change.
+        """
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.asserter.observe_device_state_change(
@@ -169,6 +213,10 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     def test_ALO_reporter_lrc_state_change_timeout_failure(
         self: TestAssertiveLoggingObserverLRC,
     ):
+        """
+        Test reporter logs FAIL on unsuccessful time out on both LRC and
+        state change.
+        """
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.reporter.observe_device_state_change(
@@ -188,6 +236,10 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     def test_ALO_asserter_lrc_state_change_timeout_failure(
         self: TestAssertiveLoggingObserverLRC,
     ):
+        """
+        Test asserter logs FAIL on unsuccessful time out on both LRC and
+        state change and throws an AssertionError for both.
+        """
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         try:
@@ -198,9 +250,9 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
                 0.05,
             )
             fail("Reached past observe_device_state_change")
-        except AssertionError as e:
-            if "Reached past observe_device_state_change" in str(e):
-                raise e
+        except AssertionError as exception:
+            if "Reached past observe_device_state_change" in str(exception):
+                raise exception
 
         try:
             self.asserter.observe_lrc_result(
@@ -210,6 +262,6 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
                 0.05,
             )
             fail("Reached past observe_lrc_result")
-        except AssertionError as e:
-            if "Reached past observe_lrc_result" in str(e):
-                raise e
+        except AssertionError as exception:
+            if "Reached past observe_lrc_result" in str(exception):
+                raise exception
