@@ -161,8 +161,8 @@ class AssertiveLoggingObserver:
         occurs within timeout, and FAIL otherwise.
 
         REQUIRES: for success requires the event_tracer is set for
-            AssertiveLoggingObserver which has subscribed to device_name and
-            target_state_name.
+        AssertiveLoggingObserver which has subscribed to device_name and
+        target_state_name.
 
         :param device_name: FQDN of device to observe state change from.
         :param target_state_name: attribute name to state to observe.
@@ -223,8 +223,8 @@ class AssertiveLoggingObserver:
         long-running-commands.html.
 
         REQUIRES: for success requires the event_tracer is set for
-            AssertiveLoggingObserver which has subscribed to device_name and
-            longRunningCommandResult.
+        AssertiveLoggingObserver which has subscribed to device_name and
+        longRunningCommandResult.
 
         :param device_name: FQDN of device to observe longRunningCommandResult
             from.
