@@ -8,7 +8,7 @@ from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 from tango.test_context import DeviceTestContext
 
-from assertive_logging_observer.assertive_logging_observer import (
+from assertive_logging_observer import (
     AssertiveLoggingObserver,
     AssertiveLoggingObserverMode,
 )
