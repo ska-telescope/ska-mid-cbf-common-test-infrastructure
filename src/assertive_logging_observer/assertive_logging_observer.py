@@ -16,10 +16,12 @@ from ska_tango_testing.integration import TangoEventTracer
 
 class AssertiveLoggingObserverMode(Enum):
     """
-    Available modes for AssertiveLoggingObserver.
+    Available modes for AssertiveLoggingObserver:
+
     - REPORTING means AssertiveLoggingObserver will just report observations.
     - ASSERTING means AssertiveLoggingObserver will report and assert
       observations.
+
     """
 
     REPORTING = 0
@@ -30,10 +32,12 @@ class AssertiveLoggingObserver:
     """
     Observing object which observes values, expressions, and commands in test
     functionality and (depending on set mode) has the following behavior:
+
     - if in mode AssertiveLoggingObserverMode.REPORTING only report on
       observations (WARN on FAILs)
     - if in mode AssertiveLoggingObserverMode.ASSERTING report and assert on
       observations (ERROR on FAILs)
+
     """
 
     def __init__(
@@ -60,6 +64,7 @@ class AssertiveLoggingObserver:
 
         :param event_tracer: TangoEventTracer to observer events from, must
             be subscribed to:
+
             - correct state attribute of correct device FQDN for calls to
               observe_device_state_change
             - longRunningCommandResult of correct device FQDN for calls to

@@ -47,6 +47,9 @@ url = "https://pypi.org/simple"
 sphinx = "^7.4.7"
 sphinx-rtd-theme = "^3.0.0"
 myst-parser = "^4.0.1"
+pytango = "9.5.0"
+ska-tango-base = "1.0.0"
+ska-tango-testing = "0.7.2"
 
 [build-system]
 requires = ["poetry-core"]
