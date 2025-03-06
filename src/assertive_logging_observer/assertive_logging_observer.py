@@ -42,13 +42,13 @@ class AssertiveLoggingObserver:
 
     def set_event_tracer(
         self: AssertiveLoggingObserver, event_tracer: TangoEventTracer
-    ) -> None:
+    ):
         """a"""
         self.event_tracer = event_tracer
 
     def _log_pass(
         self: AssertiveLoggingObserver, function_name: str, result: str
-    ) -> str:
+    ):
         self.logger.info(
             f"PASS: AssertiveLoggingObserver.{function_name} "
             f"observed: {result}"
@@ -56,7 +56,7 @@ class AssertiveLoggingObserver:
 
     def _log_fail(
         self: AssertiveLoggingObserver, function_name: str, result: str
-    ) -> str:
+    ):
         msg = (
             f"FAIL: AssertiveLoggingObserver.{function_name} "
             f"observed: {result}"
@@ -66,7 +66,7 @@ class AssertiveLoggingObserver:
         else:
             self.logger.warning(msg)
 
-    def observe_true(self: AssertiveLoggingObserver, test_bool: bool) -> None:
+    def observe_true(self: AssertiveLoggingObserver, test_bool: bool):
         """Observes true in given test_bool"""
         if test_bool:
             self._log_pass("observe_true", test_bool)
@@ -75,12 +75,23 @@ class AssertiveLoggingObserver:
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 fail()
 
-    def observe_false(self: AssertiveLoggingObserver, test_bool: bool) -> None:
+    def observe_false(self: AssertiveLoggingObserver, test_bool: bool):
         """Observes false in given test_bool"""
         if not test_bool:
             self._log_pass("observe_false", test_bool)
         else:
             self._log_fail("observe_false", test_bool)
+            if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+                fail()
+
+    def observe_equality(
+        self: AssertiveLoggingObserver, test_val1: Any, test_val2: Any
+    ):
+        """Observes equality in between test_val1 and test_val2."""
+        if test_val1 == test_val2:
+            self._log_pass("observe_equality", f"{test_val1} == {test_val2}")
+        else:
+            self._log_fail("observe_equality", f"{test_val1} =/= {test_val2}")
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 fail()
 
@@ -90,7 +101,7 @@ class AssertiveLoggingObserver:
         target_state_name: str,
         target_state: Any,
         timeout_state_change: float,
-    ) -> None:
+    ):
         """s"""
         try:
 

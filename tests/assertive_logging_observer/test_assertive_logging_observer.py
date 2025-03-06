@@ -78,6 +78,42 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
             if "Reached past observe_false" in str(exception):
                 raise exception
 
+    def test_ALO_observe_equality(self: TestAssertiveLoggingObserverBasic):
+        """
+        Test reporter and asserter for correct behavior when checking
+        equality of values.
+
+        reporter behaviour:
+        - log values stating PASS and equal if equal, and FAIL and not equal
+          otherwise.
+
+        asserter behaviour:
+        - log values stating PASS and equal if equal, and FAIL and not equal
+          otherwise.
+        - raise AssertionError in FAIL situations.
+        """
+        self.reporter.observe_equality(1, 1)
+        self.reporter.observe_equality("skao", "skao")
+        self.reporter.observe_equality(2, 1)
+        self.reporter.observe_equality("s", "skao")
+
+        self.asserter.observe_equality(1, 1)
+        self.asserter.observe_equality("skao", "skao")
+
+        try:
+            self.asserter.observe_equality(2, 1)
+            fail("Reached past observe_equality")
+        except AssertionError as exception:
+            if "Reached past observe_equality" in str(exception):
+                raise exception
+
+        try:
+            self.asserter.observe_equality("s", "skao")
+            fail("Reached past observe_equality")
+        except AssertionError as exception:
+            if "Reached past observe_equality" in str(exception):
+                raise exception
+
 
 class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     """
