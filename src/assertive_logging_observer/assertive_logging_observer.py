@@ -14,7 +14,12 @@ from ska_tango_testing.integration import TangoEventTracer
 
 
 class AssertiveLoggingObserverMode(Enum):
-    """Possible reporting modes for AssertiveLoggingObserver"""
+    """
+    Available modes for AssertiveLoggingObserver.
+    - REPORTING means AssertiveLoggingObserver will just report observations.
+    - ASSERTING means AssertiveLoggingObserver will report and assert
+      observations.
+    """
 
     REPORTING = 0
     ASSERTING = 1
@@ -22,13 +27,12 @@ class AssertiveLoggingObserverMode(Enum):
 
 class AssertiveLoggingObserver:
     """
-    Observing object which is set in an AssertiveLoggingObserverMode and acts
-    as an observer in test functionality. Depending on the mode it is
-    set to the observer will:
-    - assert and report progress and results if in
-      AssertiveLoggingObserverMode.ASSERTING
-    - only report progress and results if in
+    Observing object which observes values, expressions, and commands in test
+    functionality and depending on set mode has the following behavior:
+    - just report on observations (WARN on failures) if in mode
       AssertiveLoggingObserverMode.REPORTING
+    - report and assert on observations (ERROR on failures) if in mode
+      AssertiveLoggingObserverMode.ASSERTING
     """
 
     def __init__(
@@ -45,6 +49,10 @@ class AssertiveLoggingObserver:
     ):
         """a"""
         self.event_tracer = event_tracer
+
+    def remove_event_tracer(self: AssertiveLoggingObserver):
+        """a"""
+        self.event_tracer = None
 
     def _log_pass(
         self: AssertiveLoggingObserver, function_name: str, result: str
@@ -103,6 +111,12 @@ class AssertiveLoggingObserver:
         timeout_state_change: float,
     ):
         """s"""
+        if self.event_tracer is None:
+            raise RuntimeError(
+                "event_tracer must not be None for "
+                "AssertiveLoggingObserver.observe_device_state_change"
+            )
+
         try:
 
             assert_that(self.event_tracer).within_timeout(
@@ -142,6 +156,12 @@ class AssertiveLoggingObserver:
         timeout_lrc: float,
     ):
         """s"""
+        if self.event_tracer is None:
+            raise RuntimeError(
+                "event_tracer must not be None for "
+                "AssertiveLoggingObserver.observe_lrc_result"
+            )
+
         try:
 
             assert_that(self.event_tracer).within_timeout(

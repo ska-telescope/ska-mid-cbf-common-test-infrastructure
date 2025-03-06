@@ -139,8 +139,6 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
             MockPowerSwitch.POWERSWITCH_FQDN, "longRunningCommandResult"
         )
         cls.tracer.subscribe_event(MockPowerSwitch.POWERSWITCH_FQDN, "state")
-        cls.asserter.set_event_tracer(cls.tracer)
-        cls.reporter.set_event_tracer(cls.tracer)
 
     @classmethod
     def teardown_class(cls: TestAssertiveLoggingObserverLRC):
@@ -153,10 +151,13 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
     def setup_method(self: TestAssertiveLoggingObserverLRC, method):
         """
-        Reset MockPowerSwitch and clear events between every test.
+        Reset MockPowerSwitch, clear events between every test, and ensure
+        tracers are correctly set.
         """
         self.proxy.TurnOff()
         self.tracer.clear_events()
+        self.asserter.set_event_tracer(self.tracer)
+        self.reporter.set_event_tracer(self.tracer)
 
     def test_ALO_reporter_lrc_state_change_immediate_success(
         self: TestAssertiveLoggingObserverLRC,
@@ -301,3 +302,60 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         except AssertionError as exception:
             if "Reached past observe_lrc_result" in str(exception):
                 raise exception
+
+    def test_ALO_lrc_fail_if_no_event_tracer(
+        self: TestAssertiveLoggingObserverLRC,
+    ):
+        """
+        Test that AssertiveLoggingObserver correctly throws RuntimeError
+        in both modes if event_tracer if missing for
+        observe_device_state_change and observe_lrc_result.
+        """
+        self.reporter.remove_event_tracer()
+        self.asserter.remove_event_tracer()
+
+        cmd_result = self.proxy.TurnOnImmediately()
+
+        try:
+            self.reporter.observe_device_state_change(
+                MockPowerSwitch.POWERSWITCH_FQDN,
+                "state",
+                DevState.ON,
+                1,
+            )
+            fail("Reached past observe_device_state_change")
+        except RuntimeError:
+            pass
+
+        try:
+            self.reporter.observe_lrc_result(
+                MockPowerSwitch.POWERSWITCH_FQDN,
+                cmd_result,
+                "TurnOnImmediately",
+                1,
+            )
+            fail("Reached past observe_lrc_result")
+        except RuntimeError:
+            pass
+
+        try:
+            self.asserter.observe_device_state_change(
+                MockPowerSwitch.POWERSWITCH_FQDN,
+                "state",
+                DevState.ON,
+                1,
+            )
+            fail("Reached past observe_device_state_change")
+        except RuntimeError:
+            pass
+
+        try:
+            self.asserter.observe_lrc_result(
+                MockPowerSwitch.POWERSWITCH_FQDN,
+                cmd_result,
+                "TurnOnImmediately",
+                1,
+            )
+            fail("Reached past observe_lrc_result")
+        except RuntimeError:
+            pass
