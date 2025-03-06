@@ -44,7 +44,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
     """
 
     def test_ALO_reporter_observe_bool(
-        self: TestAssertiveLoggingObserverBasic
+        self: TestAssertiveLoggingObserverBasic,
     ):
         """
         Test reporter behavior for observe_true and observe_false:
@@ -57,7 +57,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
         self.reporter.observe_false(True)
 
     def test_ALO_asserter_observe_bool(
-        self: TestAssertiveLoggingObserverBasic
+        self: TestAssertiveLoggingObserverBasic,
     ):
         """
         Test reporter behavior for observe_true and observe_false:
@@ -83,7 +83,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
                 raise exception
 
     def test_ALO_reporter_observe_equality(
-        self: TestAssertiveLoggingObserverBasic
+        self: TestAssertiveLoggingObserverBasic,
     ):
         """
         Test reporter behavior for observe_equality:
@@ -96,7 +96,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
         self.reporter.observe_equality("s", "skao")
 
     def test_ALO_asserter_observe_equality(
-        self: TestAssertiveLoggingObserverBasic
+        self: TestAssertiveLoggingObserverBasic,
     ):
         """
         Test asserter behavior for observe_equality:
