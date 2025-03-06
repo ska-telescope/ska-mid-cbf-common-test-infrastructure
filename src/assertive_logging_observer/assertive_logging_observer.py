@@ -87,8 +87,8 @@ class AssertiveLoggingObserver:
         self: AssertiveLoggingObserver, function_name: str, result: str
     ):
         """
-        Log message of FAIL observation to logger, WARNING if in REPORTING
-        and ERROR if in ASSERTING.
+        Log message of FAIL observation to logger, WARNING level if in
+        mode REPORTING and ERROR level if in ASSERTING.
         """
         msg = (
             f"FAIL: AssertiveLoggingObserver.{function_name} "

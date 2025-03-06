@@ -15,8 +15,13 @@ include .make/k8s.mk
 # Include Python support
 include .make/python.mk
 
+# Add verbosity and INFO logging to python-test
+PYTHON_VARS_AFTER_PYTEST = -v --log-cli-level=INFO
+
+# Quickly fix isort lint issues
 python-fix-isort:
 	$(PYTHON_RUNNER) isort --profile black --line-length $(PYTHON_LINE_LENGTH) $(PYTHON_SWITCHES_FOR_ISORT) $(PYTHON_LINT_TARGET)
 
+# Quickly fix black line issues
 python-fix-black:
 	$(PYTHON_RUNNER) black --exclude .+\.ipynb --line-length $(PYTHON_LINE_LENGTH) $(PYTHON_SWITCHES_FOR_BLACK) $(PYTHON_LINT_TARGET)
