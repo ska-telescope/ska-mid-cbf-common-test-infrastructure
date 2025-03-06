@@ -10,8 +10,8 @@ from enum import Enum
 from typing import Any
 
 from assertpy import assert_that, fail
-from ska_tango_testing.integration import TangoEventTracer
 from ska_tango_base.base.base_device import DevVarLongStringArrayType
+from ska_tango_testing.integration import TangoEventTracer
 
 
 class AssertiveLoggingObserverMode(Enum):
@@ -209,7 +209,7 @@ class AssertiveLoggingObserver:
         timeout_lrc: float,
     ):
         """
-        Observes longRunningCommandResult results in 
+        Observes longRunningCommandResult results in
         [0, "{lrc_cmd_name} completed OK"] for device FQDN device_name within
         a timeout of imeout_lrc seconds. PASS behavior is stated
         longRunningCommandResult succesfully occurs within timeout, and FAIL
