@@ -43,24 +43,28 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
     Test basic reporting/assertions for AssertiveLoggingObserver.
     """
 
-    def test_ALO_observe_bool(self: TestAssertiveLoggingObserverBasic):
+    def test_ALO_reporter_observe_bool(
+        self: TestAssertiveLoggingObserverBasic
+    ):
         """
-        Test reporter and asserter for correct behavior when observing bools.
-
-        reporter behaviour:
+        Test reporter behavior for observe_true and observe_false:
         - log bool value stating PASS when correctly matching bool to called
           observe_bool and FAIL with a WARNING log otherwise.
-
-        asserter behaviour:
-        - log bool value stating PASS when correctly matching bool to called
-          observe_bool and FAIL with an ERROR log otherwise.
-        - raise AssertionError in FAIL situations.
         """
         self.reporter.observe_true(True)
         self.reporter.observe_false(False)
         self.reporter.observe_true(False)
         self.reporter.observe_false(True)
 
+    def test_ALO_asserter_observe_bool(
+        self: TestAssertiveLoggingObserverBasic
+    ):
+        """
+        Test reporter behavior for observe_true and observe_false:
+        - log bool value stating PASS when correctly matching bool to called
+          observe_bool and FAIL with an ERROR log otherwise.
+        - raise AssertionError in FAIL situations.
+        """
         self.asserter.observe_true(True)
         self.asserter.observe_false(False)
 
@@ -78,28 +82,28 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
             if "Reached past observe_false" in str(exception):
                 raise exception
 
-    def test_ALO_observe_equality(self: TestAssertiveLoggingObserverBasic):
+    def test_ALO_reporter_observe_equality(
+        self: TestAssertiveLoggingObserverBasic
+    ):
         """
-        Test reporter and asserter for correct behavior when checking
-        equality of values.
-
-        reporter behaviour:
+        Test reporter behavior for observe_equality:
         - log values stating PASS and equal if equal, and FAIL and not equal
           otherwise.
-
-        asserter behaviour:
-        - log values stating PASS and equal if equal, and FAIL and not equal
-          otherwise.
-        - raise AssertionError in FAIL situations.
         """
         self.reporter.observe_equality(1, 1)
         self.reporter.observe_equality("skao", "skao")
         self.reporter.observe_equality(2, 1)
         self.reporter.observe_equality("s", "skao")
 
-        self.asserter.observe_equality(1, 1)
-        self.asserter.observe_equality("skao", "skao")
-
+    def test_ALO_asserter_observe_equality(
+        self: TestAssertiveLoggingObserverBasic
+    ):
+        """
+        Test asserter behavior for observe_equality:
+        - log values stating PASS and equal if equal, and FAIL and not equal
+          otherwise.
+        - raise AssertionError in FAIL situations.
+        """
         try:
             self.asserter.observe_equality(2, 1)
             fail("Reached past observe_equality")
