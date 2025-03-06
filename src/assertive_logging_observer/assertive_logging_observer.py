@@ -1,7 +1,6 @@
 """
-Code for the Assertive Logging Observer which allows optional assertion of
-state change and success of LRCs or just reporting of state of LRC without
-assertion.
+Code for the AssertiveLoggingObserver which allows optional assertion or only
+reporting of observations within test functionality.
 """
 from __future__ import annotations
 
@@ -62,13 +61,13 @@ class AssertiveLoggingObserver:
         Sets the event_tracer for state change observations and LRC
         observations.
 
-        :param event_tracer: TangoEventTracer to observer events from, must
-            be subscribed to:
+        REQUIRES: event_tracer must be subscribed to:
+        - correct state attribute of correct device FQDN for calls to
+        observe_device_state_change.
+        - longRunningCommandResult of correct device FQDN for calls to
+        observe_lrc_result.
 
-            - correct state attribute of correct device FQDN for calls to
-              observe_device_state_change
-            - longRunningCommandResult of correct device FQDN for calls to
-              observe_lrc_result
+        :param event_tracer: TangoEventTracer to observe events from.
         """
         self.event_tracer = event_tracer
 
