@@ -36,3 +36,10 @@ Welcome to ska-mid-cbf-common-test-infrastructure's documentation!
    :caption: Template Service README
 
    template_service_README.md
+
+.. Assertive Logging Observer API =============================================================
+.. toctree::
+   :maxdepth: 2
+   :caption: Template Service API
+
+   ./assertive_logging_observer/assertive_logging_observer.rst
