@@ -59,6 +59,7 @@ docs-build-rtd:
   after_script:
     - echo "Hello!"
     - echo "$DOCS_RTD_API_TOKEN"
+    - echo ""
 
 # allow python-test failure temporarily (for CIP-3440) until understanding of
 # what python-test needs to do
