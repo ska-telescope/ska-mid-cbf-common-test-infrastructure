@@ -33,9 +33,9 @@ class AssertiveLoggingObserver:
     functionality and (depending on set mode) has the following behavior:
 
     - if in mode AssertiveLoggingObserverMode.REPORTING only report on
-      observations (WARN on FAILs)
+      observations
     - if in mode AssertiveLoggingObserverMode.ASSERTING report and assert on
-      observations (ERROR on FAILs)
+      observations
 
     """
 
@@ -92,17 +92,12 @@ class AssertiveLoggingObserver:
         self: AssertiveLoggingObserver, function_name: str, result: str
     ):
         """
-        Log message of FAIL observation to logger, WARNING level if in
-        mode REPORTING and ERROR level if in ASSERTING.
+        Log message of FAIL observation to logger.
         """
-        msg = (
+        self.logger.error(
             f"FAIL: AssertiveLoggingObserver.{function_name} "
             f"observed: {result}"
         )
-        if self.mode == AssertiveLoggingObserverMode.ASSERTING:
-            self.logger.error(msg)
-        else:
-            self.logger.warning(msg)
 
     def observe_true(self: AssertiveLoggingObserver, test_bool: bool):
         """

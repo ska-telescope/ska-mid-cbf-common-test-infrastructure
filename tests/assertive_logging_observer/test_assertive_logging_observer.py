@@ -49,7 +49,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
         """
         Test reporter behavior for observe_true and observe_false:
         - log bool value stating PASS when correctly matching bool to called
-          observe_bool and FAIL with a WARNING log otherwise.
+          observe_bool and FAIL otherwise.
         """
         self.reporter.observe_true(True)
         self.reporter.observe_false(False)
@@ -62,7 +62,7 @@ class TestAssertiveLoggingObserverBasic(TestAssertiveLoggingObserverCore):
         """
         Test reporter behavior for observe_true and observe_false:
         - log bool value stating PASS when correctly matching bool to called
-          observe_bool and FAIL with an ERROR log otherwise.
+          observe_bool and FAIL otherwise.
         - raise AssertionError in FAIL situations.
         """
         self.asserter.observe_true(True)
