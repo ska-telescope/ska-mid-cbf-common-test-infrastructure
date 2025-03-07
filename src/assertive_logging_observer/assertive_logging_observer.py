@@ -146,24 +146,24 @@ class AssertiveLoggingObserver:
         device_name: str,
         target_state_name: str,
         target_state: Any,
-        timeout_state_change: float,
+        timeout_state_change_sec: float,
     ):
         """
         Observes a change of state target_state_name to target state
         target_state for device FQDN device_name within a timeout of
-        timeout_state_change seconds. PASS behavior is state change succesfully
-        occurs within timeout, and FAIL otherwise.
+        timeout_state_change_sec seconds. PASS behavior is state change
+        successfully occurs within timeout, and FAIL otherwise.
 
-        REQUIRES: for success requires the event_tracer is set for
-        AssertiveLoggingObserver which has subscribed to device_name and
-        target_state_name.
+        REQUIRES: for success requires the event_tracer (which has subscribed
+        to device_name and target_state_name) is set for
+        AssertiveLoggingObserver.
 
         :param device_name: FQDN of device to observe state change from.
         :param target_state_name: attribute name to state to observe.
         :param target_state: attribute value of new state for target_state_name
             to change to.
-        :param timeout_state_change: maximum timeout to wait for state change
-            (seconds).
+        :param timeout_state_change_sec: maximum timeout to wait for state
+            change (seconds).
         """
         if self.event_tracer is None:
             raise RuntimeError(
@@ -174,7 +174,7 @@ class AssertiveLoggingObserver:
         try:
 
             assert_that(self.event_tracer).within_timeout(
-                timeout_state_change
+                timeout_state_change_sec
             ).has_change_event_occurred(
                 device_name=device_name,
                 attribute_name=target_state_name,
@@ -183,9 +183,9 @@ class AssertiveLoggingObserver:
             self._log_pass(
                 "observe_device_state_change",
                 f"successfully captured (device: {device_name} | "
-                f"state: {target_state_name} | "
-                f"state_change: {target_state} | "
-                f"within timeout: {timeout_state_change}s)",
+                f"state_name: {target_state_name} | "
+                f"target_state: {target_state} | "
+                f"within timeout: {timeout_state_change_sec}s)",
             )
 
         except AssertionError as exception:
@@ -193,9 +193,9 @@ class AssertiveLoggingObserver:
             self._log_fail(
                 "observe_device_state_change",
                 f"did not capture (device: {device_name} | "
-                f"state: {target_state_name} | "
-                f"state_change: {target_state} | "
-                f"within timeout: {timeout_state_change}s)",
+                f"state_name: {target_state_name} | "
+                f"target_state: {target_state} | "
+                f"within timeout: {timeout_state_change_sec}s)",
             )
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 raise exception
@@ -205,27 +205,27 @@ class AssertiveLoggingObserver:
         device_name: str,
         lrc_cmd_result: DevVarLongStringArrayType,
         lrc_cmd_name: str,
-        timeout_lrc: float,
+        timeout_lrc_sec: float,
     ):
         """
         Observes longRunningCommandResult results in
         [0, "{lrc_cmd_name} completed OK"] for device FQDN device_name within
-        a timeout of imeout_lrc seconds. PASS behavior is stated
+        a timeout of timeout_lrc_sec seconds. PASS behavior is stated
         longRunningCommandResult succesfully occurs within timeout, and FAIL
         otherwise. Long running command (LRC) concept can be found at
         https://developer.skao.int/projects/ska-tango-base/en/latest/concepts/
         long-running-commands.html.
 
-        REQUIRES: for success requires the event_tracer is set for
-        AssertiveLoggingObserver which has subscribed to device_name and
-        longRunningCommandResult.
+        REQUIRES: for success requires the event_tracer (which has subscribed
+        to device_name and longRunningCommandResult) is set for
+        AssertiveLoggingObserver.
 
         :param device_name: FQDN of device to observe longRunningCommandResult
             from.
         :param lrc_cmd_result: DevVarLongStringArrayType containing LRC ID as
             second item in iterable.
         :param lrc_cmd_name: basic command name of LRC.
-        :param timeout_state_change: maximum timeout to wait for successful
+        :param timeout_lrc_sec: maximum timeout to wait for successful
             longRunningCommandResult (seconds).
         """
         if self.event_tracer is None:
@@ -237,7 +237,7 @@ class AssertiveLoggingObserver:
         try:
 
             assert_that(self.event_tracer).within_timeout(
-                timeout_lrc
+                timeout_lrc_sec
             ).has_change_event_occurred(
                 device_name=device_name,
                 attribute_name="longRunningCommandResult",
@@ -253,7 +253,7 @@ class AssertiveLoggingObserver:
                 f"result: "
                 f'[0, "{lrc_cmd_name} completed OK"]'
                 " | "
-                f"within timeout: {timeout_lrc}s)",
+                f"within timeout: {timeout_lrc_sec}s)",
             )
 
         except AssertionError as exception:
@@ -265,7 +265,7 @@ class AssertiveLoggingObserver:
                 f"result: "
                 f'[0, "{lrc_cmd_name} completed OK"]'
                 " | "
-                f"within timeout: {timeout_lrc}s)",
+                f"within timeout: {timeout_lrc_sec}s)",
             )
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 raise exception

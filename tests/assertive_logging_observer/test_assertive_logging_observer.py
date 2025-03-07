@@ -1,3 +1,9 @@
+"""
+Note: ALO unit testing does not directly test log message content due to
+potential brittleness w.r.t message changes and testing against logs, testing
+philosophy is only testing that ALO is asserting properly.
+"""
+
 from __future__ import annotations
 
 import logging
