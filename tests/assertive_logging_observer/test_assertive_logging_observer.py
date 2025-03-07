@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from assertpy import fail
-from mock_power_switch import MockPowerSwitch
+from mock_tango_device import MockTangoDevice
 from ska_tango_testing.integration import TangoEventTracer
 from tango import DevState
 from tango.test_context import DeviceTestContext
@@ -127,27 +127,27 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
     @classmethod
     def setup_class(cls: TestAssertiveLoggingObserverLRC):
         """
-        Set-up DeviceTestContext of MockPowerSwitch for testing and set-up
+        Set-up DeviceTestContext of MockTangoDevice for testing and set-up
         TangoEventTracer linking it to both the reporter and the asserter.
         """
         super().setup_class()
 
         cls.context = DeviceTestContext(
-            MockPowerSwitch,
-            device_name=MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice,
+            device_name=MockTangoDevice.POWERSWITCH_FQDN,
             process=True,
         )
         cls.proxy = cls.context.__enter__()
         cls.tracer = TangoEventTracer()
         cls.tracer.subscribe_event(
-            MockPowerSwitch.POWERSWITCH_FQDN, "longRunningCommandResult"
+            MockTangoDevice.POWERSWITCH_FQDN, "longRunningCommandResult"
         )
-        cls.tracer.subscribe_event(MockPowerSwitch.POWERSWITCH_FQDN, "state")
+        cls.tracer.subscribe_event(MockTangoDevice.POWERSWITCH_FQDN, "state")
 
     @classmethod
     def teardown_class(cls: TestAssertiveLoggingObserverLRC):
         """
-        Teardown DeviceTestContext of MockPowerSwitch for testing and also
+        Teardown DeviceTestContext of MockTangoDevice for testing and also
         unsubscribing TangoEventTracer.
         """
         cls.tracer.unsubscribe_all()
@@ -155,7 +155,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
     def setup_method(self: TestAssertiveLoggingObserverLRC, method):
         """
-        Reset MockPowerSwitch, clear events between every test, and ensure
+        Reset MockTangoDevice, clear events between every test, and ensure
         tracers are correctly set.
         """
         self.proxy.TurnOff()
@@ -172,14 +172,14 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         cmd_result = self.proxy.TurnOnImmediately()
 
         self.reporter.observe_device_state_change(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             "state",
             DevState.ON,
             1,
         )
 
         self.reporter.observe_lrc_result(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             cmd_result,
             "TurnOnImmediately",
             1,
@@ -194,14 +194,14 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         cmd_result = self.proxy.TurnOnImmediately()
 
         self.asserter.observe_device_state_change(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             "state",
             DevState.ON,
             1,
         )
 
         self.asserter.observe_lrc_result(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             cmd_result,
             "TurnOnImmediately",
             1,
@@ -216,14 +216,14 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.reporter.observe_device_state_change(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             "state",
             DevState.ON,
             1,
         )
 
         self.reporter.observe_lrc_result(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             cmd_result,
             "TurnOnAfter0p3Seconds",
             1,
@@ -238,14 +238,14 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.asserter.observe_device_state_change(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             "state",
             DevState.ON,
             1,
         )
 
         self.asserter.observe_lrc_result(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             cmd_result,
             "TurnOnAfter0p3Seconds",
             1,
@@ -261,14 +261,14 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
         cmd_result = self.proxy.TurnOnAfter0p3Seconds()
 
         self.reporter.observe_device_state_change(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             "state",
             DevState.ON,
             0.05,
         )
 
         self.reporter.observe_lrc_result(
-            MockPowerSwitch.POWERSWITCH_FQDN,
+            MockTangoDevice.POWERSWITCH_FQDN,
             cmd_result,
             "TurnOnAfter0p3Seconds",
             0.05,
@@ -285,7 +285,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.asserter.observe_device_state_change(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 "state",
                 DevState.ON,
                 0.05,
@@ -297,7 +297,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.asserter.observe_lrc_result(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 cmd_result,
                 "TurnOnAfter0p3Seconds",
                 0.05,
@@ -322,7 +322,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.reporter.observe_device_state_change(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 "state",
                 DevState.ON,
                 1,
@@ -333,7 +333,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.reporter.observe_lrc_result(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 cmd_result,
                 "TurnOnImmediately",
                 1,
@@ -344,7 +344,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.asserter.observe_device_state_change(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 "state",
                 DevState.ON,
                 1,
@@ -355,7 +355,7 @@ class TestAssertiveLoggingObserverLRC(TestAssertiveLoggingObserverCore):
 
         try:
             self.asserter.observe_lrc_result(
-                MockPowerSwitch.POWERSWITCH_FQDN,
+                MockTangoDevice.POWERSWITCH_FQDN,
                 cmd_result,
                 "TurnOnImmediately",
                 1,

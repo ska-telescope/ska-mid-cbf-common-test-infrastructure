@@ -1,6 +1,11 @@
 """
 This module contains a mock tango device for testing LRCs in the
 AssertiveLoggingObserver service.
+
+Warning: There was some technical difficulty encountered (seg fault issues)
+with using the same device in multiple tango.test_context.DeviceTestContext
+instances sequentially, so it may be more difficult than appears to reuse this
+device in other contexts.
 """
 
 from __future__ import annotations
@@ -28,9 +33,9 @@ logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 tango_logger = logging.getLogger(__name__)
 
 
-class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
+class MockTangoDeviceComponentManager(TaskExecutorComponentManager):
     """
-    Mock component manager for MockPowerSwitch.
+    Mock component manager for MockTangoDevice.
     """
 
     def __init__(self, turn_on_cmd_callback):
@@ -38,7 +43,7 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         self.turn_on_cmd_callback = turn_on_cmd_callback
 
     def _turn_on_immediately(
-        self: MockPowerSwitchComponentManager,
+        self: MockTangoDeviceComponentManager,
         task_callback: Optional[Callable] = None,
         task_abort_event: Optional[Event] = None,
     ):
@@ -51,7 +56,7 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         return
 
     def turn_on_immediately(
-        self: MockPowerSwitchComponentManager,
+        self: MockTangoDeviceComponentManager,
         task_callback: Optional[Callable] = None,
     ) -> tuple[ResultCode, str]:
         """
@@ -63,7 +68,7 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         )
 
     def _turn_on_after_0p3_seconds(
-        self: MockPowerSwitchComponentManager,
+        self: MockTangoDeviceComponentManager,
         task_callback: Optional[Callable] = None,
         task_abort_event: Optional[Event] = None,
     ):
@@ -77,7 +82,7 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         return
 
     def turn_on_after_0p3_seconds(
-        self: MockPowerSwitchComponentManager,
+        self: MockTangoDeviceComponentManager,
         task_callback: Optional[Callable] = None,
     ) -> tuple[ResultCode, str]:
         """
@@ -89,21 +94,21 @@ class MockPowerSwitchComponentManager(TaskExecutorComponentManager):
         )
 
 
-class MockPowerSwitch(SKABaseDevice):
+class MockTangoDevice(SKABaseDevice):
     """
     Mock power switch device for testing LRCs in AssertiveLoggingObserver.
     """
 
     POWERSWITCH_FQDN = "test/device/power_switch"
 
-    def init_device(self: MockPowerSwitch):
+    def init_device(self: MockTangoDevice):
         """
         Sets initial state to OFF.
         """
         super().init_device()
         self.set_state(DevState.OFF)
 
-    def _turn_on(self: MockPowerSwitch) -> None:
+    def _turn_on(self: MockTangoDevice) -> None:
         """
         Callback function to set state to ON.
         """
@@ -111,7 +116,7 @@ class MockPowerSwitch(SKABaseDevice):
         self.push_change_event("state", DevState.ON)
         self.push_archive_event("state", DevState.ON)
 
-    def init_command_objects(self: MockPowerSwitch) -> None:
+    def init_command_objects(self: MockTangoDevice) -> None:
         """
         Sets up the command objects.
         """
@@ -140,14 +145,14 @@ class MockPowerSwitch(SKABaseDevice):
         )
 
     @command()
-    def TurnOff(self: MockPowerSwitch):
+    def TurnOff(self: MockTangoDevice):
         """Command to turn off immediately."""
         self.set_state(DevState.OFF)
         self.push_change_event("state", DevState.OFF)
         self.push_archive_event("state", DevState.OFF)
 
     @command(dtype_out="DevVarLongStringArray")
-    def TurnOnImmediately(self: MockPowerSwitch) -> DevVarLongStringArrayType:
+    def TurnOnImmediately(self: MockTangoDevice) -> DevVarLongStringArrayType:
         """Command to turn on immediately."""
         command_handler = self.get_command_object("TurnOnImmediately")
         result_code, command_id = command_handler()
@@ -155,7 +160,7 @@ class MockPowerSwitch(SKABaseDevice):
 
     @command(dtype_out="DevVarLongStringArray")
     def TurnOnAfter0p3Seconds(
-        self: MockPowerSwitch,
+        self: MockTangoDevice,
     ) -> DevVarLongStringArrayType:
         """Command to turn on after a delay of 0.3s."""
         command_handler = self.get_command_object("TurnOnAfter0p3Seconds")
@@ -164,5 +169,5 @@ class MockPowerSwitch(SKABaseDevice):
 
     def create_component_manager(
         self,
-    ) -> MockPowerSwitchComponentManager:
-        return MockPowerSwitchComponentManager(self._turn_on)
+    ) -> MockTangoDeviceComponentManager:
+        return MockTangoDeviceComponentManager(self._turn_on)
