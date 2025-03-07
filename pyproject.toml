@@ -13,6 +13,12 @@ authors = [
 license = "BSD License"
 readme = "README.md"
 
+packages = [
+    { include = "template_service", from = "src" },
+    { include = "assertive_logging_observer", from = "src" },
+    { include = "test_logging", from = "src" }
+]
+
 [tool.poetry.dependencies]
 python = "^3.10"
 isort = "^5.6.4"
@@ -25,11 +31,25 @@ pylint = "^2.17.4"
 pylint-junit = "^0.3.2"
 pytest-json = "^0.4.0"
 pylance = "^0.5.9"
+pytango = "9.5.0"
+ska-tango-base = "1.0.0"
+ska-tango-testing = "0.7.2"
+
+[[tool.poetry.source]]
+name = "nexus-internal"
+url = "https://artefact.skao.int/repository/pypi-internal/simple"
+
+[[tool.poetry.source]]
+name = "PyPI-public"
+url = "https://pypi.org/simple"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.4.7"
 sphinx-rtd-theme = "^3.0.0"
 myst-parser = "^4.0.1"
+pytango = "9.5.0"
+ska-tango-base = "1.0.0"
+ska-tango-testing = "0.7.2"
 
 [build-system]
 requires = ["poetry-core"]
