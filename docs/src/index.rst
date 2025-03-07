@@ -5,7 +5,7 @@
 
 
 Welcome to ska-mid-cbf-common-test-infrastructure's documentation!
-===========================================================
+==================================================================
 
 .. HOME SECTION ==================================================
 
@@ -36,3 +36,10 @@ Welcome to ska-mid-cbf-common-test-infrastructure's documentation!
    :caption: Template Service README
 
    template_service_README.md
+
+.. Assertive Logging Observer =============================================================
+.. toctree::
+   :maxdepth: 2
+   :caption: Assertive Logging Observer
+
+   ./assertive_logging_observer/assertive_logging_observer.rst
