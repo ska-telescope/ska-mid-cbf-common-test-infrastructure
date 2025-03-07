@@ -40,16 +40,6 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/release.gitlab-ci.yml'
 
-# disable dev build job
-python-build-for-development:
-  rules:
-    - when: never
-
-# disable publish to gitlab until necessary to import
-python-publish-to-gitlab:
-  rules:
-    - when: never
-
 # Ensure doc failures are non-fatal to gitlab pipelines
 docs-build:
   allow_failure: true
