@@ -13,11 +13,13 @@ from mock_tango_device import MockTangoDevice
 from tango import DevState
 from tango.test_context import DeviceTestContext
 
-from assertive_logging_observer import (
+from ska_mid_cbf_common_test_infrastructure.assertive_logging_observer import (
     AssertiveLoggingObserver,
     AssertiveLoggingObserverMode,
 )
-from test_logging.format import LOG_FORMAT
+from ska_mid_cbf_common_test_infrastructure.test_logging.format import (
+    LOG_FORMAT,
+)
 
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 test_logger = logging.getLogger(__name__)
