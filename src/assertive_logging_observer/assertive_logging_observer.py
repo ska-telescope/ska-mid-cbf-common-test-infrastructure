@@ -43,39 +43,61 @@ class AssertiveLoggingObserver:
         self: AssertiveLoggingObserver,
         mode: AssertiveLoggingObserverMode,
         logger: logging.Logger,
+        use_event_tracer: bool = True,
     ):
         """
         Initialize a AssertiveLoggingObserver instance.
 
         :param mode: behavior mode for observations.
         :param logger: logger to log observations to.
+        :param use_event_tracer: whether to assosiciate a TangoEventTracer to
+            ALO or not.
         """
         self.mode = mode
         self.logger = logger
-        self.event_tracer = None
+        self.event_tracer = TangoEventTracer() if use_event_tracer else None
 
-    def set_event_tracer(
-        self: AssertiveLoggingObserver, event_tracer: TangoEventTracer
+    def __del__(self: AssertiveLoggingObserver):
+        """TODO"""
+        if self.event_tracer is not None:
+            self.reset_event_tracer()
+
+    def _check_event_tracer(self: AssertiveLoggingObserver):
+        """Checks if event_tracer exists and throws RuntimeError if not."""
+        if self.event_tracer is None:
+            raise RuntimeError(
+                "No event_tracer associated with AssertiveLoggingObserver"
+            )
+
+    def subscribe_event_tracer(
+        self: AssertiveLoggingObserver,
+        device_name: str,
+        attr_name: str,
     ):
         """
-        Sets the event_tracer for state change observations and LRC
-        observations.
+        Subscribe event tracer to given attr_name for given device_name.
 
-        REQUIRES: event_tracer must be subscribed to:
-        - correct state attribute of correct device FQDN for calls to
-        observe_device_state_change.
-        - longRunningCommandResult of correct device FQDN for calls to
-        observe_lrc_result.
+        :param device_name: name of device to track attribute of
+        :param attr_name: attribute to track events for
+        """
+        self._check_event_tracer()
+        self.logger.info(
+            f"ALO event_tracer subscribed to {device_name}: {attr_name}"
+        )
+        self.event_tracer.subscribe_event(device_name, attr_name)
 
-        :param event_tracer: TangoEventTracer to observe events from.
+    def clear_events(self: AssertiveLoggingObserver):
         """
-        self.event_tracer = event_tracer
+        Clear events in event_tracer.
+        """
+        self.event_tracer.clear_events()
 
-    def remove_event_tracer(self: AssertiveLoggingObserver):
+    def reset_event_tracer(self: AssertiveLoggingObserver):
         """
-        Remove the current event_tracer.
+        Reset event_tracer back to original state.
         """
-        self.event_tracer = None
+        self.clear_events()
+        self.event_tracer.unsubscribe_all()
 
     def _log_pass(
         self: AssertiveLoggingObserver, function_name: str, result: str
@@ -141,66 +163,63 @@ class AssertiveLoggingObserver:
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 fail()
 
-    def observe_device_state_change(
+    def observe_device_attr_change(
         self: AssertiveLoggingObserver,
         device_name: str,
-        target_state_name: str,
-        target_state: Any,
-        timeout_state_change_sec: float,
+        target_attr_name: str,
+        target_attr_val: Any,
+        timeout_attr_change_sec: float,
     ):
         """
-        Observes a change of state target_state_name to target state
-        target_state for device FQDN device_name within a timeout of
-        timeout_state_change_sec seconds. PASS behavior is state change
+        Observes a change of attr target_attr_name to target attr
+        target_attr_val for device FQDN device_name within a timeout of
+        timeout_attr_change_sec seconds. PASS behavior is attr change
         successfully occurs within timeout, and FAIL otherwise.
 
         REQUIRES: for success requires the event_tracer (which has subscribed
-        to device_name and target_state_name) is set for
+        to device_name and target_attr_name) is set for
         AssertiveLoggingObserver.
 
-        :param device_name: FQDN of device to observe state change from.
-        :param target_state_name: attribute name to state to observe.
-        :param target_state: attribute value of new state for target_state_name
-            to change to.
-        :param timeout_state_change_sec: maximum timeout to wait for state
+        :param device_name: FQDN of device to observe attr change from.
+        :param target_attr_name: attribute name to attr to observe.
+        :param target_attr_val: attribute value of new attr for
+            target_attr_name to change to.
+        :param timeout_attr_change_sec: maximum timeout to wait for attr
             change (seconds).
+        :raises RuntimeError: error if use with no even_tracer.
         """
-        if self.event_tracer is None:
-            raise RuntimeError(
-                "event_tracer must not be None for "
-                "AssertiveLoggingObserver.observe_device_state_change"
-            )
+        self._check_event_tracer()
 
         try:
 
             assert_that(self.event_tracer).within_timeout(
-                timeout_state_change_sec
+                timeout_attr_change_sec
             ).has_change_event_occurred(
                 device_name=device_name,
-                attribute_name=target_state_name,
-                attribute_value=target_state,
+                attribute_name=target_attr_name,
+                attribute_value=target_attr_val,
             )
             self._log_pass(
-                "observe_device_state_change",
+                "observe_device_attr_change",
                 f"successfully captured (device: {device_name} | "
-                f"state_name: {target_state_name} | "
-                f"target_state: {target_state} | "
-                f"within timeout: {timeout_state_change_sec}s)",
+                f"state_name: {target_attr_name} | "
+                f"target_attr_val: {target_attr_val} | "
+                f"within timeout: {timeout_attr_change_sec}s)",
             )
 
         except AssertionError as exception:
 
             self._log_fail(
-                "observe_device_state_change",
+                "observe_device_attr_change",
                 f"did not capture (device: {device_name} | "
-                f"state_name: {target_state_name} | "
-                f"target_state: {target_state} | "
-                f"within timeout: {timeout_state_change_sec}s)",
+                f"state_name: {target_attr_name} | "
+                f"target_attr_val: {target_attr_val} | "
+                f"within timeout: {timeout_attr_change_sec}s)",
             )
             if self.mode == AssertiveLoggingObserverMode.ASSERTING:
                 raise exception
 
-    def observe_lrc_result(
+    def observe_lrc_ok(
         self: AssertiveLoggingObserver,
         device_name: str,
         lrc_cmd_result: DevVarLongStringArrayType,
@@ -227,12 +246,9 @@ class AssertiveLoggingObserver:
         :param lrc_cmd_name: basic command name of LRC.
         :param timeout_lrc_sec: maximum timeout to wait for successful
             longRunningCommandResult (seconds).
+        :raises RuntimeError: error if use with no even_tracer.
         """
-        if self.event_tracer is None:
-            raise RuntimeError(
-                "event_tracer must not be None for "
-                "AssertiveLoggingObserver.observe_lrc_result"
-            )
+        self._check_event_tracer()
 
         try:
 
@@ -247,7 +263,7 @@ class AssertiveLoggingObserver:
                 ),
             )
             self._log_pass(
-                "observe_lrc_result",
+                "observe_lrc_ok",
                 f"successfully captured (device: {device_name} | "
                 f"LRC_command: {lrc_cmd_result[1][0]} | "
                 f"result: "
@@ -259,7 +275,7 @@ class AssertiveLoggingObserver:
         except AssertionError as exception:
 
             self._log_fail(
-                "observe_lrc_result",
+                "observe_lrc_ok",
                 f"did not capture (device: {device_name} | "
                 f"LRC_command: {lrc_cmd_result[1][0]} | "
                 f"result: "
