@@ -185,9 +185,8 @@ class AssertiveLoggingObserver:
         timeout_attr_change_sec seconds. PASS behavior is attr change
         successfully occurs within timeout, and FAIL otherwise.
 
-        REQUIRES: for success requires the event_tracer (which has subscribed
-        to device_name and target_attr_name) is set for
-        AssertiveLoggingObserver.
+        REQUIRES: for success requires the event_tracer is set and is
+        subscribed to device_name for target_attr_name.
 
         :param device_name: FQDN of device to observe attr change from.
         :param target_attr_name: attribute name to attr to observe.
@@ -244,9 +243,8 @@ class AssertiveLoggingObserver:
         https://developer.skao.int/projects/ska-tango-base/en/latest/concepts/
         long-running-commands.html.
 
-        REQUIRES: for success requires the event_tracer (which has subscribed
-        to device_name and longRunningCommandResult) is set for
-        AssertiveLoggingObserver.
+        REQUIRES: for success requires the event_tracer is set and is
+        subscribed to device_name for longRunningCommandResult.
 
         :param device_name: FQDN of device to observe longRunningCommandResult
             from.
