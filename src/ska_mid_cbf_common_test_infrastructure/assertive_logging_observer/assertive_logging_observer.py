@@ -194,7 +194,7 @@ class AssertiveLoggingObserver:
             target_attr_name to change to.
         :param timeout_attr_change_sec: maximum timeout to wait for attr
             change (seconds).
-        :raises RuntimeError: error if use with no even_tracer.
+        :raises RuntimeError: error if use method with no event_tracer.
         """
         self._check_event_tracer()
 
@@ -253,7 +253,7 @@ class AssertiveLoggingObserver:
         :param lrc_cmd_name: basic command name of LRC.
         :param timeout_lrc_sec: maximum timeout to wait for successful
             longRunningCommandResult (seconds).
-        :raises RuntimeError: error if use with no even_tracer.
+        :raises RuntimeError: error if use method with no event_tracer.
         """
         self._check_event_tracer()
 
