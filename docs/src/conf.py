@@ -22,7 +22,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('.'))
 docs_src_path = os.path.dirname(os.path.abspath(__file__))
-rel_path_to_services_src = "../../src"
+rel_path_to_services_src = "../../src/ska_mid_cbf_common_test_infrastructure"
 for _dir in os.listdir(os.path.join(docs_src_path, rel_path_to_services_src)):
     sys.path.insert(
         0,
