@@ -240,8 +240,7 @@ class AssertiveLoggingObserver:
         a timeout of timeout_lrc_sec seconds. PASS behavior is stated
         longRunningCommandResult succesfully occurs within timeout, and FAIL
         otherwise. Long running command (LRC) concept can be found at
-        https://developer.skao.int/projects/ska-tango-base/en/latest/concepts/
-        long-running-commands.html.
+        https://developer.skao.int/projects/ska-tango-base/en/latest/concepts/long-running-commands.html.
 
         REQUIRES: for success requires the event_tracer is set and is
         subscribed to device_name for longRunningCommandResult.
