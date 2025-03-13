@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from assertpy import fail
+from assertpy import assert_that, fail
 from mock_tango_device import MockTangoDevice
 from tango import DevState
 from tango.test_context import DeviceTestContext
@@ -325,6 +325,40 @@ class TestAssertiveLoggingObserverLRC:
         except AssertionError as exception:
             if "Reached past observe_lrc_ok" in str(exception):
                 raise exception
+
+    def test_ALO_destructor(
+        self: TestAssertiveLoggingObserverLRC
+    ):
+        """
+        Test that destructor successfully unsubscribes associated event_tracer.
+        """
+        to_destroy = AssertiveLoggingObserver(
+            AssertiveLoggingObserverMode.REPORTING,
+            test_logger
+        )
+        to_destroy.subscribe_event_tracer(
+            MockTangoDevice.POWERSWITCH_FQDN, "state"
+        )
+        event_tracer_keep = to_destroy.event_tracer
+
+        # Explicitly call destroyer
+        del to_destroy
+
+        self.proxy.TurnOnImmediately()
+
+        try:
+            assert_that(event_tracer_keep).within_timeout(
+                1
+            ).has_change_event_occurred(
+                device_name=MockTangoDevice.POWERSWITCH_FQDN,
+                attribute_name="state",
+                attribute_value=DevState.ON,
+            )
+            fail("Reached past assert_that")
+
+        except AssertionError as assertion_err:
+            if "Reached past assert_that" in str(assertion_err):
+                raise assertion_err
 
     def test_ALO_lrc_fail_if_no_event_tracer(
         self: TestAssertiveLoggingObserverLRC,

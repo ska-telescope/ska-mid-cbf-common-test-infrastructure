@@ -53,12 +53,21 @@ class AssertiveLoggingObserver:
         :param use_event_tracer: whether to assosiciate a TangoEventTracer to
             ALO or not.
         """
-        self.mode = mode
         self.logger = logger
         self.event_tracer = TangoEventTracer() if use_event_tracer else None
+        self.mode = mode
+        if self.mode == AssertiveLoggingObserverMode.ASSERTING:
+            logger.info(
+                "AssertiveLoggingObserver instantiated in mode: "
+                f"{AssertiveLoggingObserverMode.ASSERTING}"
+            )
+        else:
+            logger.info(
+                "AssertiveLoggingObserver instantiated in mode: "
+                f"{AssertiveLoggingObserverMode.REPORTING}"
+            )
 
     def __del__(self: AssertiveLoggingObserver):
-        """TODO"""
         if self.event_tracer is not None:
             self.reset_event_tracer()
 
