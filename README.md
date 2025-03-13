@@ -8,17 +8,17 @@ ReadtheDocs: [here](https://developer.skao.int/projects/ska-mid-cbf-common-test-
 
 ## Services
 
-ska-mid-cbf-common-test-infrastructure contains multiple services for usage in test repositories with service source code located in the **src** directory and service unit testing located in the **tests** directory.
+ska-mid-cbf-common-test-infrastructure contains multiple services for usage in test repositories with service source code located in the **src/ska-mid-cbf-common-test-infrastructure** directory and service unit testing located in the **tests** directory.
 
 ### List of Current Services
 - assertive_logging_observer
+- test_logging
 - template_service
 
 ### Adding a New Service
-1. start by duplicating the template_service structure in **src** and in **tests** and renaming directories according to new service name service_name
-2. add service_name to packages in pyproject.toml
-3. for TDD progression write tests for service in service_name in **tests** (discovery occurs by normal pytest rules)
-4. implement source code in service_name in **src** to pass tests
+1. start by duplicating the template_service structure in **src/ska-mid-cbf-common-test-infrastructure** and in **tests** and renaming directories according to new service name service_name
+2. for TDD progression write tests for service in service_name in **tests** (discovery occurs by normal pytest rules)
+3. implement source code in service_name in **src/ska-mid-cbf-common-test-infrastructure/service_name** to pass tests
 5. go to **docs/src** and perform the following:
     - use sphinx-apidoc to generate module documentation in output dir service_name modifying the files as necessary to generate desired doc structure
     - soft link to README in service_name and add with toctree to service_name.rst
