@@ -326,15 +326,12 @@ class TestAssertiveLoggingObserverLRC:
             if "Reached past observe_lrc_ok" in str(exception):
                 raise exception
 
-    def test_ALO_destructor(
-        self: TestAssertiveLoggingObserverLRC
-    ):
+    def test_ALO_destructor(self: TestAssertiveLoggingObserverLRC):
         """
         Test that destructor successfully unsubscribes associated event_tracer.
         """
         to_destroy = AssertiveLoggingObserver(
-            AssertiveLoggingObserverMode.REPORTING,
-            test_logger
+            AssertiveLoggingObserverMode.REPORTING, test_logger
         )
         to_destroy.subscribe_event_tracer(
             MockTangoDevice.POWERSWITCH_FQDN, "state"
