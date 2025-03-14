@@ -21,14 +21,16 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('.'))
-docs_src_path = os.path.dirname(os.path.abspath(__file__))
-rel_path_to_services_src = "../../src"
-for _dir in os.listdir(os.path.join(docs_src_path, rel_path_to_services_src)):
-    sys.path.insert(
-        0,
-        os.path.abspath(os.path.join(rel_path_to_services_src, _dir))
+dir_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(
+    0,
+    os.path.join(
+        f"{dir_path}",
+        "..",
+        "..",
+        "src"
     )
-
+)
 
 def setup(app):
     app.add_css_file('css/custom.css')
