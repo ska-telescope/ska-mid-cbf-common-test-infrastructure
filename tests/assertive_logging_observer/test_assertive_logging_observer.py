@@ -134,7 +134,7 @@ class TestAssertiveLoggingObserverLRC:
         """
         Set-up DeviceTestContext of MockTangoDevice for testing and create a
         reporter and an asserter version of AssertiveLoggingObserver to test
-        with, subscribed to necessary test events and attributes.
+        with.
         """
         cls.context = DeviceTestContext(
             MockTangoDevice,
@@ -151,20 +151,6 @@ class TestAssertiveLoggingObserverLRC:
             AssertiveLoggingObserverMode.ASSERTING, test_logger
         )
 
-        cls.reporter.subscribe_event_tracer(
-            MockTangoDevice.POWERSWITCH_FQDN, "longRunningCommandResult"
-        )
-        cls.reporter.subscribe_event_tracer(
-            MockTangoDevice.POWERSWITCH_FQDN, "state"
-        )
-
-        cls.asserter.subscribe_event_tracer(
-            MockTangoDevice.POWERSWITCH_FQDN, "longRunningCommandResult"
-        )
-        cls.asserter.subscribe_event_tracer(
-            MockTangoDevice.POWERSWITCH_FQDN, "state"
-        )
-
     @classmethod
     def teardown_class(cls: TestAssertiveLoggingObserverLRC):
         """
@@ -177,12 +163,30 @@ class TestAssertiveLoggingObserverLRC:
 
     def setup_method(self: TestAssertiveLoggingObserverLRC, method):
         """
-        Reset MockTangoDevice, clear events between every test, and ensure
-        tracers are correctly set.
+        Reset MockTangoDevice, and ensure tracers are correctly set.
         """
         self.proxy.TurnOff()
-        self.reporter.clear_events()
-        self.asserter.clear_events()
+
+        self.reporter.subscribe_event_tracer(
+            MockTangoDevice.POWERSWITCH_FQDN, "longRunningCommandResult"
+        )
+        self.reporter.subscribe_event_tracer(
+            MockTangoDevice.POWERSWITCH_FQDN, "state"
+        )
+
+        self.asserter.subscribe_event_tracer(
+            MockTangoDevice.POWERSWITCH_FQDN, "longRunningCommandResult"
+        )
+        self.asserter.subscribe_event_tracer(
+            MockTangoDevice.POWERSWITCH_FQDN, "state"
+        )
+
+    def teardown_method(cls: TestAssertiveLoggingObserverLRC):
+        """
+        Reset tracers.
+        """
+        cls.reporter.reset_event_tracer()
+        cls.asserter.reset_event_tracer()
 
     def test_ALO_reporter_lrc_state_change_immediate_success(
         self: TestAssertiveLoggingObserverLRC,
@@ -271,6 +275,62 @@ class TestAssertiveLoggingObserverLRC:
             "TurnOnAfter0p3Seconds",
             1,
         )
+
+    def test_ALO_reporter_lrc_state_change_command_failure(
+        self: TestAssertiveLoggingObserverLRC,
+    ):
+        """
+        Test reporter logs FAIL on unsuccessful command on both LRC and
+        state change.
+        """
+        cmd_result = self.proxy.FailOnTurnOn()
+
+        self.reporter.observe_device_attr_change(
+            MockTangoDevice.POWERSWITCH_FQDN,
+            "state",
+            DevState.ON,
+            1,
+        )
+
+        self.reporter.observe_lrc_ok(
+            MockTangoDevice.POWERSWITCH_FQDN,
+            cmd_result,
+            "FailOnTurnOn",
+            1,
+        )
+
+    def test_ALO_asserter_lrc_state_change_command_failure(
+        self: TestAssertiveLoggingObserverLRC,
+    ):
+        """
+        Test asserter logs FAIL on unsuccessful command on both LRC and
+        state change and throws an AssertionError for both.
+        """
+        cmd_result = self.proxy.FailOnTurnOn()
+
+        try:
+            self.asserter.observe_device_attr_change(
+                MockTangoDevice.POWERSWITCH_FQDN,
+                "state",
+                DevState.ON,
+                1,
+            )
+            fail("Reached past observe_device_attr_change")
+        except AssertionError as exception:
+            if "Reached past observe_device_attr_change" in str(exception):
+                raise exception
+
+        try:
+            self.asserter.observe_lrc_ok(
+                MockTangoDevice.POWERSWITCH_FQDN,
+                cmd_result,
+                "FailOnTurnOn",
+                1,
+            )
+            fail("Reached past observe_lrc_ok")
+        except AssertionError as exception:
+            if "Reached past observe_lrc_ok" in str(exception):
+                raise exception
 
     def test_ALO_reporter_lrc_state_change_timeout_failure(
         self: TestAssertiveLoggingObserverLRC,
