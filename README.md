@@ -21,6 +21,7 @@ ska-mid-cbf-common-test-infrastructure contains multiple services for usage in t
 3. implement source code in service_name in **src/ska-mid-cbf-common-test-infrastructure/service_name** to pass tests
 5. go to **docs/src** and perform the following:
     - use sphinx-apidoc to generate module documentation in output dir service_name modifying the files as necessary to generate desired doc structure
-    - soft link to README in service_name and add with toctree to service_name.rst
+    - delete the modules.rst file unless using it
+    - in service_name.rst modify do document API as necessary (note: automodule will include all classes imported into your service's \_\_init\_\_.py if you add :import-members:, otherwise use ..autoclass:: with explicity python import paths to names to import classes one by one, more ways to use this file and included in sphinx documentation [here](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/build-the-docs.html#generating-documentation-from-docstrings))
     - link path to service_name.rst in new section in **docs/src/index.rst**
 6. add service to "List of Current Services" in this README

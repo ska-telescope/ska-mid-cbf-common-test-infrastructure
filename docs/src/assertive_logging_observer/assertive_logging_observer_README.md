@@ -1,1 +1,0 @@
-../../../src/ska_mid_cbf_common_test_infrastructure/assertive_logging_observer/README.md
