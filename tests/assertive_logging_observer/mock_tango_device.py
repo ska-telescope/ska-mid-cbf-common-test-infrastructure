@@ -27,7 +27,9 @@ from ska_tango_base.executor.executor_component_manager import (
 from tango import DevState
 from tango.server import command
 
-from test_logging.format import LOG_FORMAT
+from ska_mid_cbf_common_test_infrastructure.test_logging.format import (
+    LOG_FORMAT,
+)
 
 logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
 tango_logger = logging.getLogger(__name__)
@@ -38,9 +40,10 @@ class MockTangoDeviceComponentManager(TaskExecutorComponentManager):
     Mock component manager for MockTangoDevice.
     """
 
-    def __init__(self, turn_on_cmd_callback):
+    def __init__(self, turn_on_cmd_callback, fail_turn_on_callback):
         super().__init__(tango_logger)
         self.turn_on_cmd_callback = turn_on_cmd_callback
+        self.fail_turn_on_callback = fail_turn_on_callback
 
     def _turn_on_immediately(
         self: MockTangoDeviceComponentManager,
@@ -93,6 +96,32 @@ class MockTangoDeviceComponentManager(TaskExecutorComponentManager):
             task_callback=task_callback,
         )
 
+    def _fail_on_turn_on(
+        self: MockTangoDeviceComponentManager,
+        task_callback: Optional[Callable] = None,
+        task_abort_event: Optional[Event] = None,
+    ):
+        """Task execution that fails to turn mock device on after 0.3s."""
+        sleep(0.3)
+        self.fail_turn_on_callback()
+        task_callback(
+            result=(ResultCode.FAILED, "Error Turning On"),
+            status=TaskStatus.COMPLETED,
+        )
+        return
+
+    def fail_on_turn_on(
+        self: MockTangoDeviceComponentManager,
+        task_callback: Optional[Callable] = None,
+    ) -> tuple[ResultCode, str]:
+        """
+        Component manager command that fails to turn mock device on after 0.3s.
+        """
+        return self.submit_task(
+            self._fail_on_turn_on,
+            task_callback=task_callback,
+        )
+
 
 class MockTangoDevice(SKABaseDevice):
     """
@@ -108,7 +137,7 @@ class MockTangoDevice(SKABaseDevice):
         super().init_device()
         self.set_state(DevState.OFF)
 
-    def _turn_on(self: MockTangoDevice) -> None:
+    def _turn_on(self: MockTangoDevice):
         """
         Callback function to set state to ON.
         """
@@ -116,7 +145,15 @@ class MockTangoDevice(SKABaseDevice):
         self.push_change_event("state", DevState.ON)
         self.push_archive_event("state", DevState.ON)
 
-    def init_command_objects(self: MockTangoDevice) -> None:
+    def _fail_to_turn_on(self: MockTangoDevice):
+        """
+        Callback function to fail to turn on setting to FAULT.
+        """
+        self.set_state(DevState.FAULT)
+        self.push_change_event("state", DevState.FAULT)
+        self.push_archive_event("state", DevState.FAULT)
+
+    def init_command_objects(self: MockTangoDevice):
         """
         Sets up the command objects.
         """
@@ -144,6 +181,17 @@ class MockTangoDevice(SKABaseDevice):
             ),
         )
 
+        self.register_command_object(
+            "FailOnTurnOn",
+            SubmittedSlowCommand(
+                command_name="FailOnTurnOn",
+                command_tracker=self._command_tracker,
+                component_manager=self.component_manager,
+                method_name="fail_on_turn_on",
+                logger=self.logger,
+            ),
+        )
+
     @command()
     def TurnOff(self: MockTangoDevice):
         """Command to turn off immediately."""
@@ -167,7 +215,19 @@ class MockTangoDevice(SKABaseDevice):
         result_code, command_id = command_handler()
         return [[result_code], [command_id]]
 
+    @command(dtype_out="DevVarLongStringArray")
+    def FailOnTurnOn(
+        self: MockTangoDevice,
+    ) -> DevVarLongStringArrayType:
+        """Command to fail turning on after a delay of 0.3s."""
+        command_handler = self.get_command_object("FailOnTurnOn")
+        result_code, command_id = command_handler()
+        return [[result_code], [command_id]]
+
     def create_component_manager(
         self,
     ) -> MockTangoDeviceComponentManager:
-        return MockTangoDeviceComponentManager(self._turn_on)
+        return MockTangoDeviceComponentManager(
+            self._turn_on,
+            self._fail_to_turn_on,
+        )

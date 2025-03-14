@@ -1,1 +1,1 @@
-../../src/template_service/README.md
+../../src/ska_mid_cbf_common_test_infrastructure/template_service/README.md

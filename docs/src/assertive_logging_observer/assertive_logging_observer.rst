@@ -1,14 +1,11 @@
-assertive\_logging\_observer package
-====================================
-.. toctree::
-   :maxdepth: 2
-
-   assertive_logging_observer_README.md
+assertive\_logging\_observer service API Documentation
+======================================================
 
 Module contents
 ---------------
 
-.. automodule:: assertive_logging_observer
+.. automodule:: ska_mid_cbf_common_test_infrastructure.assertive_logging_observer
+   :imported-members:
    :members:
    :undoc-members:
    :show-inheritance:
