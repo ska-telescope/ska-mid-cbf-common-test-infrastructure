@@ -27,12 +27,11 @@ from ska_tango_base.executor.executor_component_manager import (
 from tango import DevState
 from tango.server import command
 
-from ska_mid_cbf_common_test_infrastructure.test_logging.format import (
-    LOG_FORMAT,
+from ska_mid_cbf_common_test_infrastructure.test_logging.formatting import (
+    setup_logger,
 )
 
-logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
-tango_logger = logging.getLogger(__name__)
+tango_logger = setup_logger(logging.getLogger(__name__))
 
 
 class MockTangoDeviceComponentManager(TaskExecutorComponentManager):

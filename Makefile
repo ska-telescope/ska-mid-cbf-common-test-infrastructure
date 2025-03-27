@@ -16,7 +16,7 @@ include .make/k8s.mk
 include .make/python.mk
 
 # Add verbosity and INFO logging to python-test
-PYTHON_VARS_AFTER_PYTEST = -v --log-cli-level=INFO
+PYTHON_VARS_AFTER_PYTEST = -vs
 
 # Quickly fix isort lint issues
 python-fix-isort:
