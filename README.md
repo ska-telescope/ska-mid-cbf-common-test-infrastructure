@@ -25,3 +25,7 @@ ska-mid-cbf-common-test-infrastructure contains multiple services for usage in t
     - in service_name.rst modify do document API as necessary (note: automodule will include all classes imported into your service's \_\_init\_\_.py if you add :import-members:, otherwise use ..autoclass:: with explicity python import paths to names to import classes one by one, more ways to use this file and included in sphinx documentation [here](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/build-the-docs.html#generating-documentation-from-docstrings))
     - link path to service_name.rst in new section in **docs/src/index.rst**
 6. add service to "List of Current Services" in this README
+
+## Bumping release version
+
+Follow instructions located at: [https://developer.skatelescope.org/en/latest/tutorial/release-management/automate-release-process.html#how-to-make-a-release](https://developer.skatelescope.org/en/latest/tutorial/release-management/automate-release-process.html#how-to-make-a-release). Since CTI is internal to CIPA there is no need for a REL ticket.

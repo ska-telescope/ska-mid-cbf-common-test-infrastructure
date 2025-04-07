@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-mid-cbf-common-test-infrastructure"
-version = "0.0.0"
+version = "0.1.0"
 description = ""
 authors = [
     "Rob Huxtable <robert.huxtable@mda.space>",
